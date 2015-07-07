@@ -9,6 +9,7 @@ Create an event subscription:
 ```ruby
 EventStream.subscribe(:my_event) do |event|
   log("#{event.name}, #{event.description}")
+end
 ```
 Then fire an event:
 
@@ -34,7 +35,7 @@ EventStream.subscribe(/my/) { |e| ... }
 EventStream.subscribe(:user_id => 1) { |e| ... }
 
 # Subscribe to events based on an arbitrary filter
-filter = lambda { |e| e.size > 3}
+filter = lambda { |e| e.size > 3 }
 EventStream.subscribe(filter) { |e| ... }
 ```
 
@@ -53,7 +54,7 @@ stream.publish(...)
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'event_stream'
+gem 'event_stream', :git => 'git@github.com:backupify/event_stream.git'
 ```
 
 And then execute:
