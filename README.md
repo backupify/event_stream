@@ -49,6 +49,13 @@ stream.subscribe(...) { |e| ... }
 stream.publish(...)
 ```
 
+## Application Testing
+
+event_stream includes a test_helper module that provides some assertions, like `assert_event_published`. To use:
+1. `require 'event_stream/test_helper'`
+2. Call `EventStream::Assertions.setup_test_subscription` in the setup block of your tests
+3. Include the `EventStream::Assertions` module where needed
+
 ## Installation
 
 Add this line to your application's Gemfile:
