@@ -6,6 +6,7 @@ module EventStream
     include Assertions
 
     setup do
+      EventStream.clear_subscribers
       Assertions.setup_test_subscription
     end
 

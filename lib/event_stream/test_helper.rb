@@ -2,7 +2,7 @@ module EventStream
 
   module TestEventStream
     class << self
-      attr_accessor :events, :subscribed
+      attr_accessor :events
     end
   end
 
@@ -10,11 +10,8 @@ module EventStream
     def self.setup_test_subscription
       TestEventStream.events = []
 
-      if !TestEventStream.subscribed
-        TestEventStream.subscribed = true
-        EventStream.subscribe(//) do |event|
-          TestEventStream.events << event
-        end
+      EventStream.subscribe(//) do |event|
+        TestEventStream.events << event
       end
     end
 
