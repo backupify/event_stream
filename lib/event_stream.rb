@@ -52,6 +52,10 @@ module EventStream
     def clear_subscribers
       @subscribers = []
     end
+
+    def subscribers
+      @subscribers
+    end
   end
 
   # @private

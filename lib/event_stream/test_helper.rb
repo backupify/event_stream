@@ -2,15 +2,19 @@ module EventStream
 
   module TestEventStream
     class << self
-      attr_accessor :events
+      attr_accessor :events, :subscribed
     end
   end
 
   module Assertions
     def self.setup_test_subscription
       TestEventStream.events = []
-      EventStream.subscribe(//) do |event|
-        TestEventStream.events << event
+
+      if !TestEventStream.subscribed
+        TestEventStream.subscribed = true
+        EventStream.subscribe(//) do |event|
+          TestEventStream.events << event
+        end
       end
     end
 
