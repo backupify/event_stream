@@ -1,4 +1,5 @@
 require 'ostruct'
+require_relative 'event_stream/subscriber_dsl'
 
 module EventStream
   class << self
@@ -10,7 +11,7 @@ module EventStream
       @default_stream ||= Stream.new
     end
 
-    def_delegators :default_stream, :publish, :subscribe
+    def_delegators :default_stream, :publish, :subscribe, :clear_subscribers
   end
 
   # An Event. Each event is an OpenStruct with a name as well as any number of other optional fields.
@@ -38,6 +39,29 @@ module EventStream
     # Or, any arbitrary predicate on events may be provided.
     # @yield [Event] action to perform when the event occurs.
     def subscribe(filter = nil, &action)
+      add_subscriber(Subscriber.create(filter, &action))
+    end
+
+    # Clears all subscribers from this event stream.
+    def clear_subscribers
+      @subscribers = []
+    end
+
+    # Returns all subscribers for this stream
+    # @return [Array<EventStream::Subscriber]
+    def subscribers
+      @subscribers
+    end
+
+    # Adds a subscriber to this stream
+    # @param [EventStream::Subscriber]
+    def add_subscriber(subscriber)
+      @subscribers << subscriber
+    end
+  end
+
+  class Subscriber < Struct.new(:filter, :action)
+    def self.create(filter = nil, &action)
       filter ||= lambda { |e| true }
       filter_predicate = case filter
                          when Symbol, String then lambda { |e| e.name.to_s == filter.to_s }
@@ -45,17 +69,9 @@ module EventStream
                          when Hash then lambda { |e| filter.all? { |k,v| e[k] === v } }
                          else filter
                          end
-      @subscribers << Subscriber.new(filter_predicate, action)
+      new(filter_predicate, action)
     end
 
-    # Clears all subscribers from this event stream.
-    def clear_subscribers
-      @subscribers = []
-    end
-  end
-
-  # @private
-  class Subscriber < Struct.new(:filter, :action)
     def consume(event)
       action.call(event) if filter.call(event)
     end

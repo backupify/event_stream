@@ -49,6 +49,32 @@ stream.subscribe(...) { |e| ... }
 stream.publish(...)
 ```
 
+### Subscriber DSL
+
+It's sometimes useful to separate the definition of a subscriber action
+from the registration of the subscriber. The `SubscriberDSL` module
+provides a way to do this.
+
+Define a subscriber by mixing in the module:
+
+```ruby
+class MySubscriber
+  include EventStream::SubscriberDSL
+
+  # Which event_stream to use. If not specified, the default will be used.
+  event_stream EventStream.default_stream
+
+  # Sets up a subscriber using a block
+  on(:my_event) { |event| puts event.name }
+end
+```
+
+The definition of this class does NOT subscribe to any events. To subscribe
+to the :my_event event, it is necessary to call `MySubscriber.subscribe`.
+
+It is possible to use multiple `on` statements in a single class.
+`MySubscriber.subscribe` will register all subscriptions.
+
 ## Application Testing
 
 event_stream includes a test_helper module that provides some assertions, like `assert_event_published`. To use:

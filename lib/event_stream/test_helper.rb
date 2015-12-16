@@ -9,6 +9,7 @@ module EventStream
   module Assertions
     def self.setup_test_subscription
       TestEventStream.events = []
+
       EventStream.subscribe(//) do |event|
         TestEventStream.events << event
       end
