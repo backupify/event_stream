@@ -6,6 +6,7 @@ module EventStream
     include Assertions
 
     setup do
+      EventStream.clear_subscribers
       Assertions.setup_test_subscription
     end
 
@@ -20,6 +21,12 @@ module EventStream
       end
     end
 
+    context 'registering the test subscription' do
+      should 'not register multiple subscriptions' do
+        assert_equal 1, EventStream.default_stream.subscribers.length
+      end
+    end
+
     context '#find_published_event' do
       should 'find an event if one is present' do
         EventStream.publish(:test_event, key: :val)
@@ -30,7 +37,6 @@ module EventStream
         EventStream.publish(:test_event, key: :other)
         refute find_published_event { |evt| evt.key == :val }
       end
-
     end
   end
 end
