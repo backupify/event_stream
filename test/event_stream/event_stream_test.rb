@@ -51,4 +51,32 @@ class EventStreamTest < Minitest::Should::TestCase
 
     end
   end
+
+  context 'managing multiple event streams' do
+    setup do
+      @stream = EventStream::Stream.new
+      EventStream.register_stream(:test_stream, @stream)
+    end
+
+    should 'allow streams to be registered and retrieved' do
+      assert_equal @stream, EventStream[:test_stream]
+    end
+
+    should 'allow separate publishes and subscriptions to different streams' do
+      test_event = nil
+
+      EventStream[:test_stream].subscribe(//) do |e|
+        test_event = e
+      end
+
+      EventStream[:test_stream].publish(:test_event)
+      assert test_event, "Event was expected to be published to the test stream"
+      assert_equal test_event.name, :test_event
+
+      test_event = nil
+
+      EventStream.publish(:test_event)
+      refute test_event, "No event should have been published to the test stream"
+    end
+  end
 end
