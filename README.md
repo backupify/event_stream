@@ -49,6 +49,22 @@ stream.subscribe(...) { |e| ... }
 stream.publish(...)
 ```
 
+### The Stream Registry
+
+To allow for easy access to different streams from different call points, a registry is available for storing and
+retrieving streams. To register a stream:
+
+```ruby
+stream = EventStream::Stream.new
+EventStream.register_stream(:my_stream_name)
+```
+
+To access the stream from the registry and publish an event:
+
+```ruby
+EventStream[:my_stream_name].publish(...)
+```
+
 ### Subscriber DSL
 
 It's sometimes useful to separate the definition of a subscriber action

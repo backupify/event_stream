@@ -1,79 +1,34 @@
 require 'ostruct'
+require_relative 'event_stream/event'
+require_relative 'event_stream/stream'
+require_relative 'event_stream/subscriber'
+require_relative 'event_stream/registry'
 require_relative 'event_stream/subscriber_dsl'
 
 module EventStream
   class << self
     extend Forwardable
 
+    # Returns the stream for a stream name from the stream registry.
+    # @param stream_name [Symbol]
+    # @return [Stream]
+    def [](stream_name)
+      Registry.lookup(stream_name)
+    end
+
+    # Registers a stream, associating it with a specific stream name
+    # @param stream_name [Symbol]
+    # @param stream [Stream]
+    def register_stream(stream_name, stream)
+      Registry.register(stream_name, stream)
+    end
+
     # The default event stream
     # @return [Stream]
     def default_stream
-      @default_stream ||= Stream.new
+      self[:default]
     end
 
     def_delegators :default_stream, :publish, :subscribe, :clear_subscribers
-  end
-
-  # An Event. Each event is an OpenStruct with a name as well as any number of other optional fields.
-  # @!attribute name
-  #   @return [Symbol]
-  class Event < OpenStruct; end
-
-  class Stream
-    def initialize
-      @subscribers = []
-    end
-
-    # Publishes an event to this event stream
-    # @param name [Symbol] name of this event
-    # @param attrs [Hash] optional attributes representing this event
-    def publish(name, attrs = {})
-      e = Event.new(attrs.merge(:name => name))
-      @subscribers.each { |l| l.consume(e) }
-    end
-
-    # Registers a subscriber to this event stream.
-    # @param filter [Object] Filters which events this subscriber will consume.
-    # If a string or regexp is provided, these will be matched against the event name.
-    # A hash will be matched against the attributes of the event.
-    # Or, any arbitrary predicate on events may be provided.
-    # @yield [Event] action to perform when the event occurs.
-    def subscribe(filter = nil, &action)
-      add_subscriber(Subscriber.create(filter, &action))
-    end
-
-    # Clears all subscribers from this event stream.
-    def clear_subscribers
-      @subscribers = []
-    end
-
-    # Returns all subscribers for this stream
-    # @return [Array<EventStream::Subscriber]
-    def subscribers
-      @subscribers
-    end
-
-    # Adds a subscriber to this stream
-    # @param [EventStream::Subscriber]
-    def add_subscriber(subscriber)
-      @subscribers << subscriber
-    end
-  end
-
-  class Subscriber < Struct.new(:filter, :action)
-    def self.create(filter = nil, &action)
-      filter ||= lambda { |e| true }
-      filter_predicate = case filter
-                         when Symbol, String then lambda { |e| e.name.to_s == filter.to_s }
-                         when Regexp then lambda { |e| e.name =~ filter }
-                         when Hash then lambda { |e| filter.all? { |k,v| e[k] === v } }
-                         else filter
-                         end
-      new(filter_predicate, action)
-    end
-
-    def consume(event)
-      action.call(event) if filter.call(event)
-    end
   end
 end
