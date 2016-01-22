@@ -7,9 +7,12 @@ module EventStream
     # Publishes an event to this event stream
     # @param name [Symbol] name of this event
     # @param attrs [Hash] optional attributes representing this event
-    def publish(name, attrs = {})
-      e = Event.new(attrs.merge(:name => name))
-      @subscribers.each { |l| l.consume(e) }
+    def publish(name_or_event, attrs = {})
+      event = case name_or_event
+              when Event then name_or_event
+              else Event.new(attrs.merge(:name => name_or_event))
+              end
+      @subscribers.each { |l| l.consume(event) }
     end
 
     # Registers a subscriber to this event stream.
