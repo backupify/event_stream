@@ -2,12 +2,12 @@ require_relative '../test_helper'
 
 class EventStreamTest < Minitest::Should::TestCase
 
-  def pub_sub(name, attrs = {}, filter = nil)
+  def pub_sub(name_or_event, attrs = {}, filter = nil)
     event = nil
     EventStream.subscribe(filter) do |e|
       event = e
     end
-    EventStream.publish(name, attrs)
+    EventStream.publish(name_or_event, attrs)
     event
   end
 
@@ -20,6 +20,12 @@ class EventStreamTest < Minitest::Should::TestCase
       event = pub_sub(:test)
       assert event
       assert_equal :test, event.name
+    end
+
+    should 'allow publishing of pre-constructed events' do
+      event = EventStream::Event.new(name: 'test', a: 1)
+      subscribed = pub_sub(event)
+      assert_equal event, subscribed
     end
 
     should 'expose all event attributes to the subscriber' do

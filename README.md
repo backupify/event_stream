@@ -17,7 +17,7 @@ Then fire an event:
 EventStream.publish(:my_event, :description => "An example event.")
 ```
 
-An event is just an OpenStruct with a name and a bundle of other attributes, so the use of `:description` here is arbitrary.
+An event is just an immutable value object with a name and a bundle of other attributes, so the use of `:description` here is arbitrary.
 
 Events can be subscribed to by name, as above, but many other ways are supported:
 
